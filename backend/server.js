@@ -1,52 +1,65 @@
 require('dotenv').config();
-const twilio = require('twilio');
+const express = require('express');
+const mongoose = require('mongoose');
+const cors = require('cors');
+const cookieParser = require('cookie-parser');
+const errorHandler = require('./middleware/errorHandler');
 
-/* ================= TWILIO ================= */
-let twilioClient = null;
+// OPTIONAL services (won’t crash app)
+require('./config/clients');
 
-if (
-  process.env.TWILIO_ACCOUNT_SID &&
-  process.env.TWILIO_AUTH_TOKEN
-) {
-  twilioClient = twilio(
-    process.env.TWILIO_ACCOUNT_SID,
-    process.env.TWILIO_AUTH_TOKEN
-  );
+const app = express();
+
+/* ===================== MIDDLEWARE ===================== */
+app.use(express.json());
+app.use(cors({ origin: true, credentials: true }));
+app.use(cookieParser());
+
+/* ===================== HEALTH CHECK ===================== */
+// ⚠️ MUST respond fast for Render
+app.get('/', (req, res) => {
+  res.status(200).send('Fleetiva backend is running 🚀');
+});
+
+app.get('/api/health', (req, res) => {
+  res.json({ status: 'ok' });
+});
+
+/* ===================== ROUTES ===================== */
+app.use('/api/auth', require('./routes/auth'));
+app.use('/api', require('./routes/logistics'));
+
+/* ===================== ERROR HANDLING ===================== */
+app.use((req, res, next) => {
+  res.status(404).json({ message: 'Route not found' });
+});
+
+app.use(errorHandler);
+
+/* ===================== DATABASE ===================== */
+const MONGO_URI = process.env.MONGO_URI;
+
+if (MONGO_URI) {
+  mongoose
+    .connect(MONGO_URI)
+    .then(() => console.log('✅ MongoDB connected'))
+    .catch(err =>
+      console.error('⚠️ MongoDB connection failed (app still running):', err.message)
+    );
 } else {
-  console.log('ℹ️ Twilio disabled (env vars missing)');
+  console.warn('⚠️ MONGO_URI not set. Running without database.');
 }
 
-/* ================= REDIS (SAFE + OPTIONAL) ================= */
-let redisClient = null;
+/* ===================== SERVER ===================== */
+// 🚨 THIS IS CRITICAL FOR RENDER
+const PORT = process.env.PORT || 10000;
 
-if (process.env.REDIS_URL && process.env.REDIS_URL.trim() !== '') {
-  const redis = require('redis');
+app.listen(PORT, () => {
+  console.log(`🚀 Server listening on port ${PORT}`);
+});
 
-  redisClient = redis.createClient({
-    url: process.env.REDIS_URL,
-    socket: {
-      reconnectStrategy: false, // 🚨 STOP infinite reconnect
-    },
-  });
-
-  redisClient.on('ready', () => {
-    console.log('✅ Redis connected');
-  });
-
-  redisClient.on('error', (err) => {
-    console.warn('⚠️ Redis error ignored:', err.message);
-  });
-
-  (async () => {
-    try {
-      await redisClient.connect();
-    } catch (err) {
-      console.warn('⚠️ Redis unavailable. Running without Redis.');
-      redisClient = null;
-    }
-  })();
-} else {
-  console.log('ℹ️ REDIS_URL not set. Redis disabled.');
-}
-
-module.exports = { twilioClient, redisClient };
+/* ===================== SAFETY ===================== */
+// DO NOT exit process on Render
+process.on('unhandledRejection', err => {
+  console.error('Unhandled rejection (ignored):', err.message);
+});
