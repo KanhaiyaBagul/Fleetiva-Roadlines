@@ -4,6 +4,8 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const admin = require("firebase-admin");
+const fs = require("fs");
+const path = require("path");
 
 const errorHandler = require("./middleware/errorHandler");
 require("./config/clients"); // redis/twilio safe
@@ -21,12 +23,22 @@ app.use(
 );
 
 /* ================= FIREBASE ADMIN ================= */
+const serviceAccountPath = "/etc/secrets/firebase-service-account.json";
+
 if (!admin.apps.length) {
+  if (!fs.existsSync(serviceAccountPath)) {
+    console.error("❌ Firebase service account file not found");
+    process.exit(1);
+  }
+
+  const serviceAccount = JSON.parse(
+    fs.readFileSync(serviceAccountPath, "utf8")
+  );
+
   admin.initializeApp({
-    credential: admin.credential.cert(
-      JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT)
-    ),
+    credential: admin.credential.cert(serviceAccount),
   });
+
   console.log("✅ Firebase Admin initialized");
 }
 
