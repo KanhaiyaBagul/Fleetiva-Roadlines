@@ -19,21 +19,23 @@ export default function Register() {
   });
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (loading) return;
+  e.preventDefault();
+  if (loading) return;
 
-    setError("");
-    setLoading(true);
+  setError("");
+  setLoading(true);
 
-    try {
-      await api.post("/auth/register", formData);
-      navigate("/login", { replace: true });
-    } catch (err) {
-      setError(err.response?.data?.message || "Registration failed");
-    } finally {
-      setLoading(false);
-    }
-  };
+  try {
+    await api.post("/auth/register", formData);
+    navigate("/login"); // 🔥 redirect directly
+  } catch (err) {
+    setError(err.response?.data?.message || "Registration failed");
+  } finally {
+    setLoading(false);
+  }
+};
+
+ 
 
   return (
     <div style={styles.container}>
