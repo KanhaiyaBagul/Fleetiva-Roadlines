@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Helmet } from "react-helmet-async";
 import { useNavigate } from "react-router-dom";
 import api from "../api/axios";
 
@@ -12,6 +13,10 @@ export default function Dashboard() {
 
   return (
     <div className="page">
+      <Helmet>
+        <title>Dashboard - Fleetiva Roadlines</title>
+        <meta name="description" content="Manage your shipments, track loads, and book trucks." />
+      </Helmet>
       <div className="page-content">
         <div className="page-header">
           <div>
@@ -20,7 +25,7 @@ export default function Dashboard() {
               Track your active shipments and post new loads in seconds.
             </p>
           </div>
-          <button className="btn btn-primary" onClick={() => navigate("/post-load")}> 
+          <button className="btn btn-primary" onClick={() => navigate("/post-load")}>
             Post New Load
           </button>
         </div>
@@ -44,13 +49,12 @@ export default function Dashboard() {
                   {b.from} → {b.to}
                 </p>
                 <span
-                  className={`tag ${
-                    b.status === "delivered"
-                      ? "success"
-                      : b.status === "in-transit"
+                  className={`tag ${b.status === "delivered"
+                    ? "success"
+                    : b.status === "in-transit"
                       ? "info"
                       : "warning"
-                  }`}
+                    }`}
                 >
                   {b.status}
                 </span>

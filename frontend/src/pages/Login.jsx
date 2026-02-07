@@ -1,4 +1,5 @@
 import { useState, useContext } from "react";
+import { Helmet } from "react-helmet-async";
 import { Link, useNavigate } from "react-router-dom";
 import { signInWithPopup, signInWithEmailAndPassword } from "firebase/auth";
 import { AppContext } from "../context/appContextStore";
@@ -52,6 +53,10 @@ export default function Login() {
 
   return (
     <div className="auth-layout">
+      <Helmet>
+        <title>Login - Fleetiva Roadlines</title>
+        <meta name="description" content="Login to your Fleetiva account to manage shipments and fleets." />
+      </Helmet>
       <div className="auth-card">
         <h2 className="page-title" style={{ textAlign: "center" }}>
           Welcome back
@@ -68,6 +73,7 @@ export default function Login() {
             placeholder="Email"
             required
             className="input"
+            aria-label="Email Address"
             value={formData.email}
             onChange={(e) =>
               setFormData({ ...formData, email: e.target.value })
@@ -79,6 +85,7 @@ export default function Login() {
             placeholder="Password"
             required
             className="input"
+            aria-label="Password"
             value={formData.password}
             onChange={(e) =>
               setFormData({ ...formData, password: e.target.value })

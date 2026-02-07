@@ -1,4 +1,5 @@
 import { useState, useContext } from "react";
+import { Helmet } from "react-helmet-async";
 import { Link, useNavigate } from "react-router-dom";
 import { AppContext } from "../context/appContextStore";
 import Toast from "../components/Toast";
@@ -38,6 +39,10 @@ export default function Register() {
 
   return (
     <div className="auth-layout">
+      <Helmet>
+        <title>Register - Fleetiva Roadlines</title>
+        <meta name="description" content="Create a Fleetiva account to start shipping or hauling." />
+      </Helmet>
       <div className="auth-card">
         <h2 className="page-title" style={{ textAlign: "center" }}>
           Create account
@@ -52,6 +57,7 @@ export default function Register() {
           <input
             placeholder="Company Name"
             className="input"
+            aria-label="Company Name"
             onChange={(e) =>
               setFormData({ ...formData, companyName: e.target.value })
             }
@@ -61,6 +67,7 @@ export default function Register() {
             placeholder="Full Name"
             required
             className="input"
+            aria-label="Full Name"
             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
           />
 
@@ -69,6 +76,7 @@ export default function Register() {
             placeholder="Email"
             required
             className="input"
+            aria-label="Email Address"
             onChange={(e) =>
               setFormData({ ...formData, email: e.target.value })
             }
@@ -78,6 +86,7 @@ export default function Register() {
             placeholder="Phone Number"
             required
             className="input"
+            aria-label="Phone Number"
             onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
           />
 
@@ -86,6 +95,7 @@ export default function Register() {
             placeholder="Password"
             required
             className="input"
+            aria-label="Password"
             onChange={(e) =>
               setFormData({ ...formData, password: e.target.value })
             }
@@ -94,6 +104,7 @@ export default function Register() {
           <select
             value={formData.role}
             className="select"
+            aria-label="Select Role"
             onChange={(e) => setFormData({ ...formData, role: e.target.value })}
           >
             <option value="customer">Customer</option>

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Helmet } from "react-helmet-async";
 import api from "../api/axios";
 
 export default function PostLoad() {
@@ -28,6 +29,10 @@ export default function PostLoad() {
 
   return (
     <div className="page centered">
+      <Helmet>
+        <title>Post Load - Fleetiva Roadlines</title>
+        <meta name="description" content="Post a new load requirement to find matching trucks." />
+      </Helmet>
       <div className="auth-card" style={{ maxWidth: 520 }}>
         <div style={{ textAlign: "center", marginBottom: 24 }}>
           <h2 className="page-title">Post New Load</h2>
@@ -38,8 +43,9 @@ export default function PostLoad() {
         <div className="form">
           <div className="form-row">
             <div className="stack">
-              <label className="label">Material Name</label>
+              <label className="label" htmlFor="material">Material Name</label>
               <input
+                id="material"
                 className="input"
                 placeholder="e.g. Steel Pipes"
                 value={material}
@@ -47,8 +53,9 @@ export default function PostLoad() {
               />
             </div>
             <div className="stack">
-              <label className="label">Required Capacity (Tons)</label>
+              <label className="label" htmlFor="capacity">Required Capacity (Tons)</label>
               <input
+                id="capacity"
                 className="input"
                 placeholder="e.g. 10"
                 type="number"
@@ -59,8 +66,9 @@ export default function PostLoad() {
           </div>
           <div className="form-row">
             <div className="stack">
-              <label className="label">Origin City</label>
+              <label className="label" htmlFor="from">Origin City</label>
               <input
+                id="from"
                 className="input"
                 placeholder="e.g. Delhi"
                 value={from}
@@ -68,8 +76,9 @@ export default function PostLoad() {
               />
             </div>
             <div className="stack">
-              <label className="label">Destination City</label>
+              <label className="label" htmlFor="to">Destination City</label>
               <input
+                id="to"
                 className="input"
                 placeholder="e.g. Mumbai"
                 value={to}

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Helmet } from "react-helmet-async";
 import api from "../api/axios";
 
 export default function DriverDashboard() {
@@ -29,6 +30,10 @@ export default function DriverDashboard() {
 
   return (
     <div className="page">
+      <Helmet>
+        <title>Driver Dashboard - Fleetiva Roadlines</title>
+        <meta name="description" content="View assigned trips and update delivery status." />
+      </Helmet>
       <div className="page-content">
         <div className="page-header">
           <div>
