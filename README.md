@@ -99,13 +99,6 @@ npm run dev
 2. Set `VITE_API_BASE_URL` to the Render backend URL + `/api`.
 3. Deploy.
 
-## Live Debug Checklist (Login 404 on Vercel)
-1. **Verify frontend env:** In Vercel, set `VITE_API_BASE_URL=https://<render-backend>.onrender.com/api`.
-2. **Confirm backend health:** Open `https://<render-backend>.onrender.com/api/health` (should return `{ status: "ok" }`).
-3. **Check request URL in DevTools:** Ensure login is calling `https://<render-backend>.onrender.com/api/auth/login`.
-4. **Confirm CORS allowlist:** Set `FRONTEND_URL=https://<your-vercel-app>.vercel.app` on Render and redeploy.
-5. **Check Axios base URL:** `getApiBaseUrl()` must not be empty; otherwise calls hit Vercel and 404.
-
 ## API Highlights
 - `POST /api/auth/register` — Register
 - `POST /api/auth/login` — Login

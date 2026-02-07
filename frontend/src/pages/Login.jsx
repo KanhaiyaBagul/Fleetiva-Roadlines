@@ -5,7 +5,6 @@ import { signInWithEmailAndPassword, signInWithPopup } from "firebase/auth";
 import { AppContext } from "../context/appContextStore";
 import Toast from "../components/Toast";
 import api from "../api/axios";
-import { getApiBaseUrl } from "../api/baseUrl";
 import { safeStorage } from "../utils/storage";
 import { auth, googleProvider, hasFirebaseConfig } from "../firebase";
 
@@ -45,12 +44,6 @@ export default function Login() {
     setLoading(true);
 
     try {
-      const apiBase = getApiBaseUrl();
-      if (!apiBase) {
-        throw new Error(
-          "API base URL is not configured. Set VITE_API_BASE_URL to your Render backend."
-        );
-      }
       let role;
       if (hasFirebaseConfig) {
         if (!auth) {
