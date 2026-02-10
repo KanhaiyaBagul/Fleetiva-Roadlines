@@ -106,7 +106,7 @@ app.get("/", (req, res) => {
 
 // ================= API ROUTES =================
 app.use("/api/auth", require("./routes/auth"));
-app.use("/api/logistics", require("./routes/logistics"));
+app.use("/api", require("./routes/logistics"));
 
 // ================= ERROR HANDLER =================
 app.use(errorHandler);

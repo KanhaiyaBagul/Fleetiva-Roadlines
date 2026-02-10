@@ -21,7 +21,8 @@ export default function PostLoad() {
       setFrom("");
       setTo("");
     } catch (err) {
-      alert("Failed to post load. Please check your inputs.");
+      console.log("ERROR:", err.response?.data);
+      alert(err.response?.data?.message || "Load post failed");
     }
   };
 
