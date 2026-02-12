@@ -13,6 +13,14 @@ RUN npm install
 # Copy application code
 COPY . .
 
+# Create a non-root user and change ownership
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S nodejs -u 1001 && \
+    chown -R nodejs:nodejs /usr/src/app
+
+# Switch to non-root user
+USER nodejs
+
 # Expose the application port
 EXPOSE 5000
 
