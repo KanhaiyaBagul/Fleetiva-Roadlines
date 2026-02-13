@@ -1,43 +1,46 @@
-import { createContext, useState, useEffect } from "react";
-import { getUserRole, isTokenExpired } from "../utils/auth";
-import { useNavigate } from "react-router-dom"; // Need this but AppContext is wrapped by Router? 
-// Wait, usually Buffer/Router wraps App. App wraps ContextProvider? 
-// No, usually ContextProvider wraps Router or Router wraps ContextProvider.
-// Checking main.jsx or similar...
-// In App.jsx:
-// <BrowserRouter> 
-//    <Routes> ... </Routes>
-// </BrowserRouter>
-// AppContext is likely used inside App or wrapping App.
-// Let's check main.jsx to see where AppProvider is.
-// If AppProvider is OUTSIDE Router, we can't use useNavigate.
-// If AppProvider is INSIDE Router, we can.
-// But better yet, just provide a logout function that clears storage, and components can redirect.
-// Or reload the page.
+import { useState, useEffect } from "react";
+import api from "../api/axios";
+import { AppContext } from "./appContextStore";
+import { safeStorage } from "../utils/storage";
 
-export const AppContext = createContext();
+export { AppContext };
 
 export const AppProvider = ({ children }) => {
-  const [loading, setLoading] = useState(true); // Start loading to check auth
+  const [loading, setLoading] = useState(false);
   const [user, setUser] = useState(null);
 
   useEffect(() => {
-    const token = localStorage.getItem("accessToken");
-    if (token) {
-      if (isTokenExpired(token)) {
-        logout();
-      } else {
-        const role = getUserRole(token);
-        setUser({ role, token });
-      }
-    }
-    setLoading(false);
+    const token = safeStorage.get("accessToken");
+    if (!token) return;
+
+    setLoading(true);
+    api
+      .get("/auth/me")
+      .then((res) => {
+        const profile = res.data.user;
+        setUser(profile);
+        safeStorage.set("role", profile.role);
+      })
+      .catch(() => {
+        safeStorage.remove("accessToken");
+        safeStorage.remove("role");
+        setUser(null);
+      })
+      .finally(() => setLoading(false));
   }, []);
 
-  const logout = () => {
-    localStorage.removeItem("accessToken");
-    setUser(null);
-    window.location.href = "/login"; // Hard redirect or let components handle it
+  const logout = async () => {
+    setLoading(true);
+    try {
+      await api.post("/auth/logout");
+    } catch (error) {
+      console.error("Logout error:", error);
+    } finally {
+      safeStorage.remove("accessToken");
+      safeStorage.remove("role");
+      setUser(null);
+      setLoading(false);
+    }
   };
 
   return (
@@ -52,6 +55,11 @@ function FullScreenLoader() {
   return (
     <div style={styles.overlay}>
       <div style={styles.spinner}></div>
+      <style>{`
+        @keyframes spin {
+          to { transform: rotate(360deg); }
+        }
+      `}</style>
     </div>
   );
 }

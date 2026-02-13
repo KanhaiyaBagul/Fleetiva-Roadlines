@@ -1,60 +1,164 @@
-import React from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import React, { useContext, useMemo } from "react";
 
-// Pages
-import Login from './pages/Login';
-import Register from './pages/Register';
-import ForgotPassword from './pages/ForgotPassword';
-import Dashboard from './pages/Dashboard';
-import AdminDashboard from './pages/AdminDashboard';
-import SuperAdminDashboard from './pages/SuperAdminDashboard';
-import DriverDashboard from './pages/DriverDashboard';
-import PostLoad from './pages/PostLoad';
-import PostTruck from './pages/PostTruck';
-import SystemLogs from './pages/SystemLogs';
-import ProtectedRoute from './components/ProtectedRoute';
+
+import { safeStorage } from "./utils/storage";
+import { Toaster } from "react-hot-toast";
+
+import Navbar from "./components/Navbar";
+import LandingPage from "./pages/LandingPage";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
+import AdminDashboardPage from "./pages/AdminDashboard";
+import CustomerDashboard from "./pages/CustomerDashboard";
+import DriverDashboard from "./pages/DriverDashboard";
+import SuperAdminDashboard from "./pages/SuperAdminDashboard";
+import SystemLogs from "./pages/SystemLogs";
+import PostLoad from "./pages/PostLoad";
+import PostTruck from "./pages/PostTruck";
+import ForgotPassword from "./pages/ForgotPassword";
+import Profile from "./pages/Profile";
+import Stats from "./pages/Stats";
+import MyLoads from "./pages/MyLoads";
+import MyTrucks from "./pages/MyTrucks";
+
+const ProtectedRoute = ({ children, role }) => {
+  const { user, loading } = useContext(AppContext);
+  const currentRole = user?.role || safeStorage.get("role");
+
+  if (loading) return null;
+  if (!user) return <Navigate to="/login" />;
+  if (role && currentRole && currentRole !== role) return <Navigate to="/" />;
+
+  return children;
+};
+
+const RootRedirect = () => {
+  const { user, loading } = useContext(AppContext);
+  const role = user?.role || safeStorage.get("role");
+
+  if (loading) return null;
+  if (!user) return <Navigate to="/login" />;
+
+  if (role === "superadmin") return <Navigate to="/superadmin" />;
+  if (role === "admin") return <Navigate to="/admin" />;
+  if (role === "driver") return <Navigate to="/driver" />;
+  return <Navigate to="/dashboard" />;
+};
 
 const App = () => {
+  const { user } = useContext(AppContext);
+
+  const showNavbar = useMemo(() => Boolean(user), [user]);
+
   return (
-    <BrowserRouter>
+    <Router>
+      {showNavbar && <Navbar />}
+
       <Routes>
-        <Route path="/" element={<Navigate to="/login" replace />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
+        <Route path="/" element={user ? <RootRedirect /> : <LandingPage />} />
+        <Route path="/login" element={user ? <RootRedirect /> : <Login />} />
+        <Route
+          path="/register"
+          element={user ? <RootRedirect /> : <Register />}
+        />
         <Route path="/forgot-password" element={<ForgotPassword />} />
 
-        {/* Dashboards */}
-        <Route element={<ProtectedRoute allowedRoles={['customer', 'admin', 'superadmin']} />}>
-          <Route path="/dashboard" element={<Dashboard />} />
-        </Route>
+        <Route
+          path="/admin"
+          element={
+            <ProtectedRoute role="admin">
+              <AdminDashboardPage />
+            </ProtectedRoute>
+          }
+        />
 
-        <Route element={<ProtectedRoute allowedRoles={['admin']} />}>
-          <Route path="/admin-dashboard" element={<AdminDashboard />} />
-        </Route>
+        <Route
+          path="/superadmin"
+          element={
+            <ProtectedRoute role="superadmin">
+              <SuperAdminDashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/superadmin/logs"
+          element={
+            <ProtectedRoute role="superadmin">
+              <SystemLogs />
+            </ProtectedRoute>
+          }
+        />
 
-        <Route element={<ProtectedRoute allowedRoles={['superadmin']} />}>
-          <Route path="/super-admin-dashboard" element={<SuperAdminDashboard />} />
-          <Route path="/system-logs" element={<SystemLogs />} />
-        </Route>
+        <Route
+          path="/driver"
+          element={
+            <ProtectedRoute role="driver">
+              <DriverDashboard />
+            </ProtectedRoute>
+          }
+        />
 
-        <Route element={<ProtectedRoute allowedRoles={['driver']} />}>
-          <Route path="/driver-dashboard" element={<DriverDashboard />} />
-        </Route>
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute role="customer">
+              <CustomerDashboard />
+            </ProtectedRoute>
+          }
+        />
 
-        {/* Features */}
-        <Route element={<ProtectedRoute allowedRoles={['customer']} />}>
-          <Route path="/post-load" element={<PostLoad />} />
-        </Route>
-
-        <Route element={<ProtectedRoute allowedRoles={['driver']} />}>
-          <Route path="/post-truck" element={<PostTruck />} />
-        </Route>
-
-        {/* Fallback */}
-        <Route path="*" element={<Navigate to="/login" replace />} />
+        <Route
+          path="/post-load"
+          element={
+            <ProtectedRoute role="customer">
+              <PostLoad />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/post-truck"
+          element={
+            <ProtectedRoute role="driver">
+              <PostTruck />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <Profile />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/stats"
+          element={
+            <ProtectedRoute>
+              <Stats />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/my-loads"
+          element={
+            <ProtectedRoute>
+              <MyLoads />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/my-trucks"
+          element={
+            <ProtectedRoute role="driver">
+              <MyTrucks />
+            </ProtectedRoute>
+          }
+        />
       </Routes>
-    </BrowserRouter>
+      <Toaster position="top-right" />
+    </Router>
   );
-}
+};
 
 export default App;
