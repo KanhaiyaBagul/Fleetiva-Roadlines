@@ -6,7 +6,7 @@ const mongoose = require("mongoose");
 const { connectMongo } = require("./config/db2");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
-const admin = require("firebase-admin"); 
+const admin = require("firebase-admin");
 const fs = require("fs");
 
 const errorHandler = require("./middleware/errorHandler");
@@ -17,9 +17,23 @@ const app = express();
 /* ================= MIDDLEWARE ================= */
 app.use(express.json());
 app.use(cookieParser());
+const allowedOrigins = [
+  "http://localhost:5173",
+  "http://localhost:3000",
+  process.env.FRONTEND_URL
+].filter(Boolean);
+
 app.use(
   cors({
-    origin: true,
+    origin: function (origin, callback) {
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.indexOf(origin) === -1) {
+        const msg =
+          "The CORS policy for this site does not allow access from the specified Origin.";
+        return callback(new Error(msg), false);
+      }
+      return callback(null, true);
+    },
     credentials: true,
   })
 );
@@ -52,7 +66,7 @@ if (process.env.SKIP_FIREBASE === "true") {
 }
 
 
- 
+
 /* ================= MONGODB ================= */
 if (!process.env.MONGO_URI) {
   console.error("❌ MONGO_URI missing");
